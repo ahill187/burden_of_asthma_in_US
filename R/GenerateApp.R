@@ -9,6 +9,7 @@ source("R/LeafletMap.R")
 source("R/CensusDataUS.R")
 source("R/CountryBaseMap.R")
 source("R/TransformedData.R")
+source("R/TabItemDashPaper.R")
 source("R/ColumnOptionsObject.R")
 
 appData = fromJSON("static_data/app.json")
@@ -97,6 +98,14 @@ for(i in 1:appData$appLayout$subTabs$number){
       imageId = appData$tabs$imageId[i],
       imFile = appData$tabs$imFile[i]
     )
+  } else if(tabType == "paper") {
+      tabItemsList[[appData$tabs$inputId[i]]] = TabItemDashPaper$new(
+          title = appData$tabs$title[i],
+          inputId = appData$tabs$inputId[i],
+          tabNumber = i,
+          valueBoxNumber = appData$tabs$valueBoxNumber[[i]],
+          valueBoxWidths = appData$tabs$valueBoxWidths[[i]]
+      )
   }
 }
 country = "US"

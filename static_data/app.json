@@ -2,16 +2,16 @@
     "title": "Burden of Asthma in US",
     "appLayout": {
       "mainTabs": {
-        "number": 4,
-        "titles": ["Costs", "QALYs", "About", "Terms"],
-        "tabIds": ["costTab", "qalyTab", "tab5", "tab6"]
+        "number": 5,
+        "titles": ["Costs", "QALYs", "About", "Terms", "Intro"],
+        "tabIds": ["costTab", "qalyTab", "tab5", "tab6", "tab7"]
       },
       "subTabs": {
-        "number":6,
+        "number":7,
         "titles":[{"Costs":["Map","Graph"]},
           {"QALYs":["Map","Graph"]},
           "About",
-          "Terms"]
+          "Terms", "Intro"]
       },
       "colorScheme":"startup",
       "dashboardColour": "cg-blue"
@@ -188,6 +188,14 @@
         "markdownFileName" : "disclaimer.rmd",
         "imageId" : null,
         "imFile" : null
+      },
+        {
+        "title": "Intro",
+        "inputId": "tab7",
+        "tabType": "paper",
+        "tabNumber" : 7,
+        "valueBoxNumber": 3,
+        "valueBoxWidths": [6,6,12]
       }
     ]
 }

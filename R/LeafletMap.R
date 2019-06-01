@@ -203,6 +203,69 @@ LeafletMap <- R6Class(
       }
       self$layerIds = layerIds
 
+    },
+
+    updateLayer = function(clickEvent, layer) {
+        if(is.null(clickEvent$lng)) {
+            if(layer==1) {
+                return(2)
+            } else {
+                return(1)
+            }
+        }
+    },
+
+    isBaseLayerChange = function(clickEvent){
+        if(is.null(clickEvent$lng)) {
+            return(TRUE)
+        } else {
+            return(FALSE)
+        }
+    },
+
+    getLayerRegionId = function(baseLayerChange, inputMapShapeClick, layer){
+        if(baseLayerChange){
+            if(is.null(inputMapShapeClick)) {
+                shapeId = "layer_1_region_1"
+            } else {
+                shapeId = inputMapShapeClick$id
+            }
+            shapeValue = strsplit(shapeId, "_")[[1]]
+            region = paste0(shapeValue[3], "_", shapeValue[4])
+            return(paste0("layer_", layer, "_", region))
+        } else {
+            return(inputMapShapeClick$id)
+        }
+    },
+
+    getLayerRegionId2 = function(clickEvent){
+        if(is.null(clickEvent)) {
+            return(NULL)
+        } else {
+            if(is.null(clickEvent$lng)) {
+                baseLayerChange = T
+                if(value$layer==1){
+                    value$layer = 2
+                } else {
+                    value$layer = 1
+                }
+            } else {
+                baseLayerChange = F
+            }
+            if(baseLayerChange) {
+                if(is.null(input[[mapShapeClick]])) {
+                    shapeId = "layer_1_region_1"
+                } else {
+                    shapeId = input[[mapShapeClick]]$id
+                }
+                shapeValue = strsplit(shapeId, "_")[[1]]
+                region = paste0(shapeValue[3], "_", shapeValue[4])
+                return(paste0("layer_", value$layer, "_", region))
+            } else {
+               return(input[[mapShapeClick]]$id)
+            }
+        }
+
     }
   )
   )

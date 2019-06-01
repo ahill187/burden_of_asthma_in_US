@@ -42,7 +42,6 @@ tab_titles = appData$appLayout$mainTabs$titles
 numberOfTabs = appData$appLayout$subTabs$number
 valueBoxIcons = list(icon("user", lib="font-awesome"), icon("usd", lib="font-awesome"))
 i = 1
-appLayout <- AppLayout$new(6, "burdenOfAsthma")
 initialize = TRUE
 cat("~~~ Starting UI ~~~", fill = T)
 
@@ -91,6 +90,11 @@ ui <- dashboardPage(
             menuItem(
                 tab_titles[4],
                 tabName = appData$tabs$inputId[6],
+                icon = icon("balance-scale", lib = "font-awesome")
+            ),
+            menuItem(
+                tab_titles[5],
+                tabName = appData$tabs$inputId[7],
                 icon = icon("balance-scale", lib = "font-awesome")
             )
         )
@@ -284,9 +288,7 @@ server <- function(input, output, session) {
                         input[[tabItemsList[[tabNumber()]]$sliderId]] - 2000
                     })
 
-
                     output[[mapOutputId]] <- renderLeaflet({
-                        print(year())
                         leafletMap()$drawMap(year())
                     })
                     cat("~~~ Setting up Info Boxes ~~~", fill = T)
@@ -295,36 +297,23 @@ server <- function(input, output, session) {
                     mapBaseLayerChange <- paste0(mapOutputId, "_click")
                     value <- reactiveValues(noClickYet = FALSE, layer = 1)
                     valueBoxOutputIds <- tabItemDash$valueBoxOutputIds
-                    layerRegionId <- eventReactive(input[[mapBaseLayerChange]],
-                                                   ignoreNULL=FALSE,{
-                                                       clickEvent = input[[mapBaseLayerChange]]
-                                                       if(is.null(clickEvent)) {
-                                                           return(NULL)
-                                                       } else {
-                                                           if(is.null(clickEvent$lng)) {
-                                                               baseLayerChange = T
-                                                               if(value$layer==1){
-                                                                   value$layer = 2
-                                                               } else {
-                                                                   value$layer = 1
-                                                               }
-                                                           } else {
-                                                               baseLayerChange = F
-                                                           }
-                                                           if(baseLayerChange) {
-
-                                                               if(is.null(input[[mapShapeClick]])) {
-                                                                   shapeId = "layer_1_region_1"
-                                                               } else {
-                                                                   shapeId = input[[mapShapeClick]]$id
-                                                               }
-                                                               shapeValue = strsplit(shapeId, "_")[[1]]
-                                                               region = paste0(shapeValue[3], "_", shapeValue[4])
-                                                               return(paste0("layer_", value$layer, "_", region))
-                                                           } else {
-                                                               return(input[[mapShapeClick]]$id)
-                                                           }
-                                                       }
+                    layerRegionId <- eventReactive(
+                        input[[mapBaseLayerChange]],
+                        ignoreNULL=FALSE, {
+                        clickEvent = input[[mapBaseLayerChange]]
+                        if(is.null(clickEvent)) {
+                            return(NULL)
+                        } else {
+                            #print(value$layer)
+                            value$layer = leafletMap()$updateLayer(clickEvent,value$layer)
+                            baseLayerChange = leafletMap()$isBaseLayerChange(clickEvent)
+                            layerRegionId = leafletMap()$getLayerRegionId(
+                                baseLayerChange,
+                                input[[mapShapeClick]],
+                                value$layer
+                                )
+                            return(layerRegionId)
+                        }
                                                    })
                     lapply(1:tabItemDash$valueBoxNumber, function(box) {
                         boxId <- valueBoxOutputIds[box]
@@ -346,36 +335,27 @@ server <- function(input, output, session) {
                                 layerRegionId <- "layer_1_region_1"
                             }
 
-
-                            layerRegionId = strsplit(layerRegionId, "_")
-                            layerId = as.numeric(layerRegionId[[1]][2])
-                            regionId = as.numeric(layerRegionId[[1]][4])
-                            value2 <-
+                            layerId = valueBoxOutputBrick$getLayerId(layerRegionId)
+                            regionId = valueBoxOutputBrick$getRegionId(layerRegionId)
+                            layerValueData <-
                                 leafletMap()$getLayerValueData(valueName = valueName,
-                                                             year = year(),
-                                                             layer = layerId)
+                                                               year = year(),
+                                                               layer = layerId)
+                            val = valueBoxOutputBrick$getValue(layerValueData, leafletMap()$prefix, regionId)
                             regionName = leafletMap()$regionNames[regionId]
                             subtitles = names(tabItemDash$valueBoxChoices)
-                            if (box == tabItemDash$valueBoxNumber) {
-                                subtitle = subtitles[box]
-                                subtitle = paste(subtitle, regionName)
-                            } else{
-                                subtitle = subtitles[box]
-                            }
-                            if (value2[regionId] == 0 ||
-                                value2[regionId] == "No data") {
-                                value2 = "No data"
-                            } else {
-                                value2 = paste(leafletMap()$prefix, value2)
-                            }
+                            subtitle = valueBoxOutputBrick$getSubtitle(box, subtitles, regionName)
                             valueBox(
-                                value = value2[regionId],
+                                value = val[regionId],
                                 subtitle = subtitle,
                                 color = colorScheme[box],
                                 icon = valueBoxIcons[[layerId]]
                             )
                         })
                     })
+                    # OutputType 5: Paper Output
+                } else if (outputType == "paperOutput") {
+
                 }
             })
         }

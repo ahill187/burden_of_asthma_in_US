@@ -1,11 +1,9 @@
 source('./R/helper_functions.R')
 source('./R/TabItemDash.R')
 source('./R/utils.R')
-source('./R/helper_functions.R')
 source('./R/ColumnOptionsObject.R')
 library(R6)
 library(shiny)
-
 
 
 TabItemDashGraph <- R6Class(
